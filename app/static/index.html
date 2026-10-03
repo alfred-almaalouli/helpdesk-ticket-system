@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Helpdesk Tickets</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>Helpdesk Tickets</h1>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>New ticket</h2>
+      <form id="ticket-form" data-testid="ticket-form" novalidate>
+        <label for="title">Title</label>
+        <input id="title" name="title" data-testid="title-input" maxlength="100">
+
+        <label for="description">Description</label>
+        <textarea id="description" name="description" data-testid="description-input" rows="3"></textarea>
+
+        <label for="priority">Priority</label>
+        <select id="priority" name="priority" data-testid="priority-select">
+          <option value="LOW">Low</option>
+          <option value="MEDIUM" selected>Medium</option>
+          <option value="HIGH">High</option>
+          <option value="CRITICAL">Critical</option>
+        </select>
+
+        <button type="submit" data-testid="create-button">Create ticket</button>
+        <p id="form-message" data-testid="form-message" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <h2>Tickets</h2>
+        <label>Status
+          <select id="status-filter" data-testid="status-filter">
+            <option value="">All</option>
+            <option value="OPEN">Open</option>
+            <option value="IN_PROGRESS">In progress</option>
+            <option value="RESOLVED">Resolved</option>
+            <option value="CLOSED">Closed</option>
+          </select>
+        </label>
+      </div>
+      <table data-testid="ticket-table">
+        <thead>
+          <tr><th>#</th><th>Title</th><th>Priority</th><th>Status</th><th>Due</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="ticket-rows"></tbody>
+      </table>
+      <p id="empty-message" data-testid="empty-message" hidden>No tickets found.</p>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

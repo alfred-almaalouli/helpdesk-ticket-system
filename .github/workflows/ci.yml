@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  unit-and-api:
+    name: Unit + API tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - name: Unit tests
+        run: pytest -m unit -v
+      - name: API tests with coverage
+        run: pytest -m "unit or api" --cov=app --cov-report=term-missing
+
+  ui:
+    name: UI tests (Playwright)
+    needs: unit-and-api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: python -m playwright install --with-deps chromium
+      - name: UI tests
+        run: pytest -m ui -v
+
+  docker:
+    name: Docker build + smoke test
+    needs: ui
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image
+        run: docker build -t helpdesk .
+      - name: Start container
+        run: docker run -d -p 5000:5000 --name helpdesk helpdesk
+      - name: Smoke test
+        run: |
+          for i in $(seq 1 20); do curl -fs http://localhost:5000/api/health && break; sleep 1; done
+          curl -fs -X POST http://localhost:5000/api/tickets \
+            -H "Content-Type: application/json" \
+            -d '{"title": "Smoke test ticket", "priority": "LOW"}'
+          curl -fs http://localhost:5000/api/tickets | grep "Smoke test ticket"
